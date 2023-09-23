@@ -1,0 +1,70 @@
+import random
+import smtplib
+from twilio.rest import Client
+
+# Function to generate a random 6-digit OTP
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+# Function to send OTP via email
+def send_otp_via_email(email, otp):
+    smtp_server = 'smtp.example.com'  # Your SMTP server (e.g., Gmail)
+    smtp_port = 587  # SMTP port (587 for TLS, 465 for SSL)
+    sender_email = 'your_email@example.com'
+    sender_password = 'your_password'
+
+    subject = 'Your OTP Code'
+    body = f'Your OTP code is: {otp}'
+
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        
+        message = f'Subject: {subject}\n\n{body}'
+        server.sendmail(sender_email, email, message)
+        server.quit()
+        print(f"OTP sent to {email} via email.")
+    except Exception as e:
+        print(f"Error sending OTP via email: {str(e)}")
+
+# Function to send OTP via SMS (using Twilio)
+def send_otp_via_sms(phone_number, otp):
+    twilio_account_sid = 'your_account_sid'
+    twilio_auth_token = 'your_auth_token'
+    twilio_phone_number = 'your_twilio_phone_number'
+    
+    try:
+        client = Client(twilio_account_sid, twilio_auth_token)
+        message = client.messages.create(
+            body=f"Your OTP code is: {otp}",
+            from_=twilio_phone_number,
+            to=phone_number
+        )
+        print(f"OTP sent to {phone_number} via SMS.")
+    except Exception as e:
+        print(f"Error sending OTP via SMS: {str(e)}")
+
+# Main program
+if __name__ == "__main__":
+    # Simulate a user requesting an OTP
+    email = input("Enter your email address: ")
+    phone_number = input("Enter your cellphone number (with country code): ")
+    
+    # Generate OTP
+    otp = generate_otp()
+    
+    # Send OTP via email
+    send_otp_via_email(email, otp)
+    
+    # Send OTP via SMS
+    send_otp_via_sms(phone_number, otp)
+    
+    # Simulate user entering OTP
+    entered_otp = input("Enter the OTP you received: ")
+    
+    # Verify OTP
+    if entered_otp == otp:
+        print("OTP is valid. Access granted.")
+    else:
+        print("Invalid OTP. Access denied.")
